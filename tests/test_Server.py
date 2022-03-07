@@ -1,39 +1,70 @@
+import os
+import socket
+import threading
 from unittest import TestCase
+import Server
+import Client
 
 
 class Test(TestCase):
-    def test_find_name(self):
-        self.fail()
-
-    def test_send_all(self):
-        self.fail()
-
     def test_send(self):
-        self.fail()
+        online_users = {}  # key is the name. value is the client socket
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP socket initialization
+        tcp_socket.bind(("", 55000))
+        tcp_socket.listen(15)
+        port_thread = threading.Thread(target=Server.receive, args=(tcp_socket, online_users, 55000))
+        port_thread.start()
+
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.bind(("", 0))
+        client.connect(('127.0.0.1', 55000))
+        client.send("msg_all_hello|client1".encode())
+        message = client.recv(1024).decode()
+        self.assertEqual(message, "Can't send message. Need to log in first")
 
     def test_disconnect(self):
-        self.fail()
+        online_users = {}  # key is the name. value is the client socket
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP socket initialization
+        tcp_socket.bind(("", 55000))
+        tcp_socket.listen(15)
+        port_thread = threading.Thread(target=Server.receive, args=(tcp_socket, online_users, 55000))
+        port_thread.start()
 
-    def test_log_out(self):
-        self.fail()
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.bind(("", 0))
+        client.connect(('127.0.0.1', 55000))
+        client.send("disconnect".encode())
+        message = client.recv(1024).decode()
+        self.assertEqual(message, "disconnected")
 
-    def test_log_in(self):
-        self.fail()
+    def test_get_users(self):
+        online_users = {}  # key is the name. value is the client socket
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP socket initialization
+        tcp_socket.bind(("", 55000))
+        tcp_socket.listen(15)
+        port_thread = threading.Thread(target=Server.receive, args=(tcp_socket, online_users, 55000))
+        port_thread.start()
 
-    def test_download(self):
-        self.fail()
-
-    def test_send_file(self):
-        self.fail()
-
-    def test_show_users(self):
-        self.fail()
-
-    def test_show_files(self):
-        self.fail()
-
-    def test_handle(self):
-        self.fail()
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.bind(("", 0))
+        client.connect(('127.0.0.1', 55000))
+        client.send("get_users".encode())
+        message = client.recv(1024).decode()
+        self.assertEqual(message, "users: []")
 
     def test_connect(self):
-        self.fail()
+        online_users = {}  # key is the name. value is the client socket
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP socket initialization
+        tcp_socket.bind(("", 55000))
+        tcp_socket.listen(15)
+        port_thread = threading.Thread(target=Server.receive, args=(tcp_socket, online_users, 55000))
+        port_thread.start()
+
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.bind(("", 0))
+        client.connect(('127.0.0.1', 55000))
+        client.send("connect|client1".encode())
+        message = client.recv(1024).decode()
+        self.assertEqual(message, "client1 is connected")
+        message = client.recv(1024).decode()
+        self.assertEqual(message, "connected")
