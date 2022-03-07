@@ -1,0 +1,79 @@
+@startuml
+'https://plantuml.com/use-case-diagram
+
+
+
+
+note "User write input of ip address\n and server address.\n client create tcp connection." as a1
+note "user input" as a2
+
+note "input = 'disconnect'.\n return True, last_byte' " as disconnect1
+note "server disconnect client.\n server inform users \n and client'" as disconnect2
+note "client receive 'disconnected'\n message from the server.\n client close the socket\n and stop the current thread\n" as disconnect3
+
+user --> a1
+a1 --> a2
+a2 --> disconnect1
+disconnect1 --> disconnect2
+disconnect2 --> disconnect3
+disconnect3 --> a1
+
+
+note "input = 'connect'.\n user write name. message to server:\n 'connect|<name>'" as connect1
+note "server add the client\n to the list of users.\n server inform all \n the users" as connect2
+
+a2 --> connect1
+connect1 --> connect2
+connect2 --> a2
+
+
+note "input = 'get_users'.\n message to server:\n 'get_users'" as get_users1
+note "server send back users names." as get_users2
+
+a2 --> get_users1
+get_users1 --> get_users2
+get_users2 --> a2
+
+
+note "input = 'get_list_file'.\n message to server:\n 'get_list_file'" as get_files1
+note "server send back files names." as get_files2
+
+a2 --> get_files1
+get_files1 --> get_files2
+get_files2 --> a2
+
+
+note "input = 'download'. user \nwrite file name. message to server:\n 'download|<file_name>'" as download1
+note "server check if the file exist.\n\server open the file and extract its data.\nserver send to the client:\n '|<amount_of_packets>'.\nserver wait for client response.\n" as download2
+note "client create udp socket\nand send to server its address" as download3
+note "server send to client packets\n and wait for client response" as download4
+note "client ask user for input if to proceed.\n client send server the input" as download5
+note "server stop and exit or continue\n sending packets (depends\non the message)" as download6
+note "client receive the packets\nand sort them using the sequence number.\n client send\nback to server list of\n packets sequence numbers to\n resend or 'stop' if\nall the packets arrived.\n if finished, user write new file name." as download7
+note "server resend packets\nand wait for client response." as download8
+
+a2 --> download1
+download1 -> download2
+download2 -> download3
+download3 -> download4
+download4 -> download5
+download5 --> download6
+download5 --> a2
+download6 --> download7
+download7 --> download8
+download8 --> download7
+download5 --> a2
+
+
+note "for any other input:\nuser write target name. or\n press enter to send all users. message \nto server: 'msg|<name>|<data>'\nor 'msg_all|<data>'" as msg1
+note "server send message data to all" as msg2
+note "server send message data to one user" as msg3
+
+
+a2 --> msg1
+msg1 --> msg2
+msg1 --> msg3
+msg2 --> a2
+msg3 --> a2
+
+@enduml
